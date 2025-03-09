@@ -1,0 +1,72 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lib_tools.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:14:18 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/09 15:17:58 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
+{
+	size_t	i;
+
+	i = 0;
+	if (n == 0)
+		return (0);
+	while (s1[i] && s2[i] && s1[i] == s2[i] && i < n - 1)
+	{
+		i++;
+	}
+	return ((unsigned char)s1[i] -(unsigned char)s2[i]);
+}
+
+static int	int_len(long c)
+{
+	int	i;
+
+	i = 0;
+	if (c <= 0)
+	{
+		i++;
+		c = -c;
+	}
+	while (c)
+	{
+		c /= 10;
+		i++;
+	}
+	return (i);
+}
+
+char	*ft_itoa(int n)
+{
+	long	c;
+	char	*str;
+	int		len;
+
+	c = n;
+	len = int_len(c);
+	str = (char *)malloc (len + 1);
+	if (!str)
+		return (NULL);
+	str[len--] = '\0';
+	if (c == 0)
+		str[0] = '0';
+	if (c < 0)
+	{
+		str[0] = '-';
+		c = -c ;
+	}
+	while (c)
+	{
+		str[len--] = (c % 10) + '0';
+		c /= 10;
+	}
+	return (str);
+}
