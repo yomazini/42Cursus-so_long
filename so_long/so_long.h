@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/09 16:30:08 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/10 00:59:01 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,12 @@
 typedef struct data_game
 {
 	int				fd;
-	size_t			num_line;
+	int			num_line;
 	char			*str;
 	char			**map;
-	size_t			count_pe;
-	size_t			count_c;
+	size_t			count_player;
+	size_t			count_exit;
+	size_t			count_collectable;
 	void			*mlx;
 	void			*win;
 	size_t			ww;
@@ -55,10 +56,10 @@ char	*ft_strchr(const char *s, int c);
 char	*ft_strdup(const char *s);
 char	*ft_substr(const char *s, size_t start, size_t len);
 
-
+size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize);
 int	ft_strncmp(const char *s1, const char *s2, size_t n);
 char	*ft_itoa(int n);
 char	**ft_split(const char *s, char c);
 
 
-#endif
+#endif 
