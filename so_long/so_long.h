@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/10 00:59:01 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/10 01:49:58 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 #  define S_KEY 1
 #  define A_KEY 0
 #  define D_KEY 2
-// define mask 
 
 typedef struct data_game
 {
