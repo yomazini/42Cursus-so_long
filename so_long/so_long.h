@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/10 03:44:49 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/10 16:51:51 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 # define A_KEY 0
 # define D_KEY 2
 
-typedef struct s_map_properties
+typedef struct s_map_data
 {
 	size_t			width;
 	size_t			height;
@@ -33,7 +33,7 @@ typedef struct s_map_properties
 	size_t			collectible_count;
 	size_t			exit_count;
 	size_t			player_count;
-}					t_map_props;
+}					t_map_data;
 
 typedef struct s_game
 {
@@ -41,7 +41,7 @@ typedef struct s_game
 	int				line_count;
 	char			*raw_map;
 	char			**map_grid;
-	t_map_props		props;
+	t_map_data		props;
 	void			*mlx;
 	void			*win;
 	size_t			window_width;
