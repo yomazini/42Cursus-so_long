@@ -6,100 +6,123 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:15:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/10 03:13:00 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/10 03:44:49 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../so_long.h"
 
-static void	ft_counting_cpe(t_game *game, char count)
+static void	count_map_element(t_game *game, char element_type, int x, int y)
 {
-	if (count == 'C')
-		game->count_collectable++;
-	else if (count == 'E')
-		game->count_exit++;
-	else if (count == 'P')
-		game->count_player++;
-}
-
-
-int is_element_valid(t_game *game)
-{
-	game->count_collectable = 0;
-	game->count_exit = 0;
-	game->count_player = 0;
-	int i, j;
-	i = 0;
-	char *allowed_textures = "01PCE";
-	while (i < game->num_line)
+	if (element_type == 'C')
+		game->props.collectible_count++;
+	else if (element_type == 'E')
+		game->props.exit_count++;
+	else if (element_type == 'P')
 	{
-		j = 0;
-		while (game->map[i][j])
-		{
-			if (!ft_strchr(allowed_textures, game->map[i][j]))
-				return 0;
-			if (game->map[i][j] == 'C' || game->map[i][j] == 'E' || game->map[i][j] == 'P')
-				ft_counting_cpe(game ,game->map[i][j]);
-			j++;
-		}
-		i++;
+		game->props.player_count++;
+		game->props.player_pos_x = x;
+		game->props.player_pos_y = y;
 	}
-	if (game->count_collectable < 1 || game->count_exit != 1 || game->count_player != 1)
-		return 0;
-	return 1;
 }
 
-void	ft_flood_fill(size_t x, size_t y, size_t num_line, char **map)
+int	validate_map_elements(t_game *game)
 {
-	if (x < 0 || y < 0 || x > num_line || y > ft_strlen(map[0]))
-		return ;
-	if (map[x][y] == 'E')
-		map[x][y] = '1';
-	if (map[x][y] == '1' || map[x][y] == 'V')
-		return ;
-	map[x][y] = 'V';
-	ft_flood_fill(x - 1, y, num_line, map);
-	ft_flood_fill(x + 1, y, num_line, map);
-	ft_flood_fill(x, y - 1, num_line, map);
-	ft_flood_fill(x, y + 1, num_line, map);
-}
-int		checking_new_map(char **map)
-{
-	int i, j;
-	i = 0;
-	char *still_ce = "CE";
-	while (map[i])
+	game->props.collectible_count = 0;
+	game->props.exit_count = 0;
+	game->props.player_count = 0;
+	int row, col;
+	const char *valid_chars = "01PCE";
+
+	row = 0;
+	while (row < game->line_count)
 	{
-		j = 0;
-		while (map[i][j])
+		col = 0;
+		while (game->map_grid[row][col])
 		{
-			if (ft_strchr(still_ce,map[i][j]))
+			if (!ft_strchr(valid_chars, game->map_grid[row][col]))
 				return (0);
-			j++;
+			if (game->map_grid[row][col] == 'C' || 
+				game->map_grid[row][col] == 'E' || 
+				game->map_grid[row][col] == 'P')
+				count_map_element(game, game->map_grid[row][col], row, col);
+			col++;
 		}
-		i++;
+		row++;
 	}
-	return 1;
+	if (game->props.collectible_count < 1 || 
+		game->props.exit_count != 1 || 
+		game->props.player_count != 1)
+		return (0);
+	return (1);
 }
 
-int	validating_new_map(t_game game)
+void	flood_fill_check(size_t x, size_t y, size_t max_lines, char **grid)
 {
-	int i, j;
-	char **copy_map = ft_split(game.str, '\n');
-	if (!copy_map)
-		return 0;
+	// Check boundaries
+	if (x < 0 || y < 0 || x >= max_lines || y >= ft_strlen(grid[0]))
+		return;
+	
+	// Mark exit separately 
+	if (grid[x][y] == 'E')
+	{
+		grid[x][y] = 'V'; // Mark as visited but differently
+		return;
+	}
+	
+	// Skip walls and already visited tiles
+	if (grid[x][y] == '1' || grid[x][y] == 'V')
+		return;
+	
+	// Mark current tile as visited
+	grid[x][y] = 'V';
+	
+	// Explore in all four directions
+	flood_fill_check(x - 1, y, max_lines, grid); // Up
+	flood_fill_check(x + 1, y, max_lines, grid); // Down
+	flood_fill_check(x, y - 1, max_lines, grid); // Left
+	flood_fill_check(x, y + 1, max_lines, grid); // Right
+}
 
-	for (i = 0; copy_map[i]; i++)
-		for (j = 0; copy_map[i][j]; j++)
-			if (copy_map[i][j] == 'P')
-			{
-				ft_flood_fill(i, j, game.num_line, copy_map);
-				if (!checking_new_map(copy_map))
-				{
-					free_all(copy_map);
-					return 0;
-				}
-			}
-	free_all(copy_map);
-	return 1;
+int	verify_remaining_elements(char **grid)
+{
+	int row, col;
+	
+	row = 0;
+	while (grid[row])
+	{
+		col = 0;
+		while (grid[row][col])
+		{
+			// If we find collectibles or exit that weren't visited, path is invalid
+			if (grid[row][col] == 'C' || grid[row][col] == 'E')
+				return (0);
+			col++;
+		}
+		row++;
+	}
+	return (1);
+}
+
+int	validate_map_path(t_game game)
+{
+	char **map_copy;
+	int valid_path = 0;
+	
+	// Create a copy of the map for path validation
+	map_copy = ft_split(game.raw_map, '\n');
+	if (!map_copy)
+		return (0);
+	
+	// Start flood fill from player position
+	flood_fill_check(game.props.player_pos_x, game.props.player_pos_y, 
+					game.line_count, map_copy);
+	
+	// Check if all collectibles and exit are reachable
+	valid_path = verify_remaining_elements(map_copy);
+	
+	// Cleanup
+	free_all(map_copy);
+	
+	return (valid_path);
 }

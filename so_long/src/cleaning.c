@@ -6,30 +6,32 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:17:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/10 03:04:03 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/10 03:44:49 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../so_long.h"
 
-void	handle_error(t_game *game)
+void	cleanup_resources(t_game *game)
 {
-	free(game->str);
-	free_all(game->map);
-	close(game->fd);
+	if (game->raw_map)
+		free(game->raw_map);
+	free_all(game->map_grid);
+	if (game->fd > 0)
+		close(game->fd);
 }
 
-void	free_all(char **map)
+void	free_all(char **grid)
 {
-	int i;
+	int	row;
 
-	i = 0;
-	if (!map)
+	row = 0;
+	if (!grid)
 		return ;
-	while(map[i])
+	while (grid[row])
 	{
-		free(map[i]);
-		i++;
+		free(grid[row]);
+		row++;
 	}
-	free(map);
+	free(grid);
 }
