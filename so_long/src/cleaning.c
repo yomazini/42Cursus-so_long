@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:17:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 21:14:24 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 21:26:36 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,11 @@ void	*ft_memset(void *b, int c, size_t len)
 	}
 	return (b);
 }
-void	print_moves(t_game *game)// cleaning.c
+
+void	print_moves(t_game *game)
 {
-	char *nmr_moves;
+	char	*nmr_moves;
+
 	nmr_moves = ft_itoa(game->move_count);
 	ft_putstr(">Player moves: ");
 	ft_putstr(nmr_moves);

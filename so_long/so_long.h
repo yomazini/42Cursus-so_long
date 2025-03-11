@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 21:14:16 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 21:18:46 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,18 +90,18 @@ int		validate_map_path(t_game game);
 
 /*	build_map.c 	*/
 
-int build_graphic_map(t_game *game);
-void get_dimention_map(t_game *game);
+int		build_graphic_map(t_game *game);
+void	get_dimention_map(t_game *game);
 void	imgs_to_map(t_game *game);
-void create_map(t_game *game);
+void	create_map(t_game *game);
 void	put_xpm_element(t_game *game, char *name_of_xpm, int order);
 
 /*	events_n_moves.c	*/
-
-int handling_the_keys(int key_pressed, t_game *game);
-int window_exit(t_game *game);
-void player_moves(t_game *game, unsigned int key_pressed);
+int		handling_the_keys(int key_pressed, t_game *game);
+int		window_exit(t_game *game);
+void	player_moves(t_game *game, unsigned int key_pressed);
 void	player_lookup(t_game *game);
-void player_new_position(t_game *game, int new_x_position, int new_y_position);
+void	player_new_position(t_game *game,
+			int new_x_position, int new_y_position);
 
 #endif 
