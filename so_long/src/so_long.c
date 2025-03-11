@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 03:58:40 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 17:11:30 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ static	int	validate_file_extension(char *path)
 		return (0);
 	return (ft_strncmp(path + path_len - 4, valid_extenstion, 4) == 0);
 }
-
 
 static int	process_map(char *path, t_game *game)
 {
@@ -57,7 +56,6 @@ void get_dimention_map(t_game *game)
     game->img_width = game->window_width;
     game->img_height = game->window_height;
 }
-
 
 int handling_the_keys(int key_pressed, t_game *game);
 
@@ -110,7 +108,6 @@ void create_map(t_game *game)
     }
 }
 
-
 int window_exit(t_game *game)
 {
     int i;
@@ -128,7 +125,6 @@ int window_exit(t_game *game)
     exit(0);
     return 0;
 }
-
 
 void	player_lookup(t_game *game)
 {
@@ -152,6 +148,7 @@ void	player_lookup(t_game *game)
 		row++;
 	}
 }
+
 void	print_moves(t_game *game)
 {
 	char *nmr_moves;
@@ -159,6 +156,7 @@ void	print_moves(t_game *game)
 	ft_putstr(">Player moves: ");
 	ft_putstr(nmr_moves);
 	ft_putstr("\n");
+	free(nmr_moves);
 }
 
 int build_graphic_map(t_game *game)
@@ -168,7 +166,7 @@ int build_graphic_map(t_game *game)
         return 0;
         
     get_dimention_map(game);
-    if (game->window_width > 2304 || game->window_height > 1296)
+    if (game->window_width > 5120 || game->window_height > 2880)
     {
         perror("\nError: Map dimensions too large");
         free(game->mlx);
@@ -186,7 +184,6 @@ int build_graphic_map(t_game *game)
     create_map(game);
     mlx_hook(game->win, ON_KEYDOWN, KeyPressMask, handling_the_keys, game);
     mlx_hook(game->win, ON_DESTROY, 0, window_exit, game);
-    
     mlx_loop(game->mlx);
     return 1;
 }
@@ -201,18 +198,6 @@ int handling_the_keys(int key_pressed, t_game *game)
     return (1);
 }
 
-// int	handling_the_keys(int key_pressed, t_game *game)
-// {
-// 	if (key_pressed == ESC_KEY)
-// 	{
-// 		window_exit(game);
-// 	}
-// 	else if (key_pressed == W_KEY|| key_pressed == A_KEY || key_pressed == S_KEY || key_pressed == D_KEY )
-// 	{
-// 		player_moves(game, key_pressed);
-// 	}
-// 	return (1);
-// }
 void player_new_position(t_game *game, int new_x_position, int new_y_position)
 {
     if (new_x_position < 0 || new_y_position < 0 || 
@@ -260,31 +245,79 @@ void player_moves(t_game *game, unsigned int key_pressed)
         player_new_position(game, game->props.player_pos_x + 1, game->props.player_pos_y);
 }
 
+#include "../so_long.h"
+
+void	debug_checks(void)
+{
+    ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
+    system("leaks so_long");                          // Memory leak check (macOS)
+    system("lsof -p $(pgrep so_long) | grep REG");      // List open regular files
+    ft_putstr("--- End of Debug Checks ---\n");
+}
+
 int main(int ac, char **av)
 {
     t_game game;
+
     ft_memset(&game, 0, sizeof(t_game));
+    atexit(debug_checks);  // Register debug_checks() to run when main exits
 
     if (ac != 2)
     {
         ft_putstr("\nError: Invalid arguments. Usage: ./so_long map.ber\n");
         return (1);
     }
-    
+
     if (!process_map(av[1], &game))
-    {    
+    {
         ft_putstr("\nError: Map validation failed\n");
         return (1);
     }
-    
+
     ft_putstr("\nMap validation successful. Starting game...\n");
-    
-    if (!build_graphic_map(&game)) 
+
+    if (!build_graphic_map(&game))
     {
         ft_putstr("\nError: Failed to initialize graphics\n");
         cleanup_resources(&game);
         return (1);
     }
-    
+
+    /* 
+       Game loop and interactions would go here.
+       For debugging, we cleanup immediately to check that all resources are freed.
+    */
+    cleanup_resources(&game);
+    ft_putstr("\nExiting game. Resources cleaned up.\n");
     return (0);
 }
+
+
+
+// int main(int ac, char **av)
+// {
+//     t_game game;
+//     ft_memset(&game, 0, sizeof(t_game));
+
+//     if (ac != 2)
+//     {
+//         ft_putstr("\nError: Invalid arguments. Usage: ./so_long map.ber\n");
+//         return (1);
+//     }
+    
+//     if (!process_map(av[1], &game))
+//     {    
+//         ft_putstr("\nError: Map validation failed\n");
+//         return (1);
+//     }
+    
+//     ft_putstr("\nMap validation successful. Starting game...\n");
+    
+//     if (!build_graphic_map(&game)) 
+//     {
+//         ft_putstr("\nError: Failed to initialize graphics\n");
+//         cleanup_resources(&game);
+//         return (1);
+//     }
+//     return (0);
+// }
