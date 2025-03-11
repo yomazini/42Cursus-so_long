@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:17:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/10 03:44:49 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 03:33:38 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,4 +34,13 @@ void	free_all(char **grid)
 		row++;
 	}
 	free(grid);
+}
+void *ft_memset(void *b, int c, size_t len)
+{
+    unsigned char *ptr;
+    
+    ptr = (unsigned char*)b;
+    while (len--)
+        *ptr++ = (unsigned char)c;
+    return (b);
 }

@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 01:41:43 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 03:33:43 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,11 @@ typedef struct s_game
 	void			*textures[5];
 	size_t			move_count;
 }					t_game;
+
+
+
+void *ft_memset(void *b, int c, size_t len);
+
 
 /* gnl functions */
 char	*get_next_line(int fd);
