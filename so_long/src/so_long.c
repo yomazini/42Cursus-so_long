@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 17:11:30 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 18:02:15 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -247,13 +247,17 @@ void player_moves(t_game *game, unsigned int key_pressed)
 
 #include "../so_long.h"
 
-void	debug_checks(void)
+void debug_checks()
 {
+    char cmd[256];
+    pid_t pid = getpid();
+    sprintf(cmd, "lsof -p %d", pid);
     ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
-    system("leaks so_long");                          // Memory leak check (macOS)
-    system("lsof -p $(pgrep so_long) | grep REG");      // List open regular files
+    system("leaks so_long");  // Memory leak check (macOS)
+    system(cmd);              // FD check using proper PID
     ft_putstr("--- End of Debug Checks ---\n");
 }
+
 
 int main(int ac, char **av)
 {
@@ -288,10 +292,10 @@ int main(int ac, char **av)
        For debugging, we cleanup immediately to check that all resources are freed.
     */
     cleanup_resources(&game);
-    ft_putstr("\nExiting game. Resources cleaned up.\n");
+    ft_putstr("\nExiting game. Resources cleaned up.\n\n\n");
+	close(game.fd);
     return (0);
 }
-
 
 
 // int main(int ac, char **av)
