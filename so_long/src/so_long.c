@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 03:42:33 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 03:58:40 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void get_dimention_map(t_game *game)
 }
 
 
-int	handling_the_keys(t_game *game, unsigned int key_pressed);
+int handling_the_keys(int key_pressed, t_game *game);
 
 void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
 {
@@ -191,18 +191,28 @@ int build_graphic_map(t_game *game)
     return 1;
 }
 
-int	handling_the_keys(t_game *game, unsigned int key_pressed)
+int handling_the_keys(int key_pressed, t_game *game)
 {
-	if (key_pressed == ESC_KEY)
-	{
-		window_exit(game);
-	}
-	else if (key_pressed == W_KEY|| key_pressed == A_KEY || key_pressed == S_KEY || key_pressed == D_KEY )
-	{
-		player_moves(game, key_pressed);
-	}
-	return (1);
+    if (key_pressed == ESC_KEY)
+        window_exit(game);
+    else if (key_pressed == W_KEY || key_pressed == A_KEY || 
+             key_pressed == S_KEY || key_pressed == D_KEY)
+        player_moves(game, key_pressed);
+    return (1);
 }
+
+// int	handling_the_keys(int key_pressed, t_game *game)
+// {
+// 	if (key_pressed == ESC_KEY)
+// 	{
+// 		window_exit(game);
+// 	}
+// 	else if (key_pressed == W_KEY|| key_pressed == A_KEY || key_pressed == S_KEY || key_pressed == D_KEY )
+// 	{
+// 		player_moves(game, key_pressed);
+// 	}
+// 	return (1);
+// }
 void player_new_position(t_game *game, int new_x_position, int new_y_position)
 {
     if (new_x_position < 0 || new_y_position < 0 || 

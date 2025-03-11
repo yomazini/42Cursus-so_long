@@ -1,0 +1,1057 @@
+CC = cc
+
+CFLAGS = -Wall -Wextra -Werror 
+
+NAME = so_long
+NAME_BONUS = so_long_bonus
+
+SRC = src/so_long.c src/gnl.c src/parse1.c src/parse2.c src/cleaning.c src/gnl_utils.c src/lib_tools.c src/split.c
+
+OBJ = $(SRC:.c=.o)
+
+all: $(NAME)
+
+$(NAME): $(OBJ) 
+	$(CC)  $(CFLAGS) $(OBJ) -lmlx -framework OpenGL -framework AppKit -o $(NAME)
+
+src/%.o: src/%.c so_long.h
+	$(CC)  $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJ) $(BONUS_OBJ)
+
+fclean: clean
+	rm -f $(NAME) $(NAME_BONUS)
+
+re: fclean all /* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   so_long.h                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/11 03:33:43 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef SO_LONG_H
+# define SO_LONG_H
+# include <stdlib.h>
+# include <unistd.h>
+# include <stdio.h>
+# include "mlx.h"
+# include <fcntl.h>
+
+# define BUFFER_SIZE 10
+# define ESC_KEY 53 
+# define W_KEY 13
+# define S_KEY 1
+# define A_KEY 0
+# define D_KEY 2
+# define ON_KEYDOWN 2
+# define ON_DESTROY 17
+# define KeyPressMask 1L<<0
+# define tile_size 50
+
+typedef struct s_map_data
+{
+	int				width;
+	int				height;
+	size_t			player_pos_x;
+	size_t			player_pos_y;
+	size_t			collectible_count;
+	size_t			exit_count;
+	size_t			player_count;
+}					t_map_data;
+
+typedef struct s_game
+{
+	int				fd;
+	int				line_count;
+	char			*raw_map;
+	char			**map_grid;
+	t_map_data		props;
+	void			*mlx;
+	void			*win;
+	size_t			window_width;
+	size_t			window_height;
+	int				img_width;
+	int				img_height;
+	void			*textures[5];
+	size_t			move_count;
+}					t_game;
+
+
+
+void *ft_memset(void *b, int c, size_t len);
+
+
+/* gnl functions */
+char	*get_next_line(int fd);
+size_t	ft_strlen(const char *s);
+char	*ft_strjoin(char const *s1, char const *s2);
+char	*ft_strchr(const char *s, int c);
+char	*ft_strdup(const char *s);
+char	*ft_substr(const char *s, size_t start, size_t len);
+
+/* libtools functions */
+size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize);
+int		ft_strncmp(const char *s1, const char *s2, size_t n);
+char	*ft_itoa(int n);
+char	**ft_split(const char *s, char c);
+void	ft_putstr(char *str);
+
+/* cleaning functions */
+void	cleanup_resources(t_game *game);
+void	free_all(char **grid);
+
+/* parsing functions */
+int		validate_map_file(char *path, t_game *game);
+int		process_map_content(t_game *game);
+int		verify_map_shape(t_game *game);
+int		check_wall_border(t_game *game, int line_idx);
+int		validate_map_elements(t_game *game);
+void	flood_fill_check(size_t x, size_t y, size_t max_lines, char **grid);
+int		verify_remaining_elements(char **grid);
+int		validate_map_path(t_game game);
+
+/* this below for the mlx map building */
+
+
+
+
+
+#endif /* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   build_map.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/10 20:36:25 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/10 20:36:29 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cleaning.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/10 02:17:20 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/11 03:33:38 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+void	cleanup_resources(t_game *game)
+{
+	if (game->raw_map)
+		free(game->raw_map);
+	free_all(game->map_grid);
+	if (game->fd > 0)
+		close(game->fd);
+}
+
+void	free_all(char **grid)
+{
+	int	row;
+
+	row = 0;
+	if (!grid)
+		return ;
+	while (grid[row])
+	{
+		free(grid[row]);
+		row++;
+	}
+	free(grid);
+}
+void *ft_memset(void *b, int c, size_t len)
+{
+    unsigned char *ptr;
+    
+    ptr = (unsigned char*)b;
+    while (len--)
+        *ptr++ = (unsigned char)c;
+    return (b);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   gnl.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:14:16 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/09 15:19:26 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+static char	*read_line(int fd, char **saved)
+{
+	char	*buffer;
+	char	*temp;
+	ssize_t	bytes_read;
+
+	buffer = malloc((size_t)BUFFER_SIZE + 1);
+	if (!buffer)
+		return (free(*saved), *saved = NULL, NULL);
+	while (!ft_strchr(*saved, '\n'))
+	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (free(buffer), free(*saved), *saved = NULL, NULL);
+		if (bytes_read == 0)
+			break ;
+		buffer[bytes_read] = '\0';
+		temp = *saved;
+		*saved = ft_strjoin(*saved, buffer);
+		free(temp);
+		if (!*saved)
+			return (free(buffer), NULL);
+	}
+	return (free(buffer), *saved);
+}
+
+static char	*extract_line(char **saved)
+{
+	char	*line;
+	char	*temp;
+	size_t	len;
+
+	if (!*saved || !**saved)
+		return (NULL);
+	len = 0;
+	while ((*saved)[len] && (*saved)[len] != '\n')
+		len++;
+	line = ft_substr(*saved, 0, len + ((*saved)[len] == '\n'));
+	temp = *saved;
+	*saved = ft_strdup(*saved + len + ((*saved)[len] == '\n'));
+	free(temp);
+	if (!line || !*saved)
+		return (free(line), NULL);
+	return (line);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*saved;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	if (!saved)
+		saved = ft_strdup("");
+	if (!saved || !read_line(fd, &saved))
+		return (free(saved), saved = NULL, NULL);
+	line = extract_line(&saved);
+	if (!line)
+		return (free(saved), saved = NULL, NULL);
+	return (line);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   gnl_utils.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:14:14 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/10 01:49:42 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+size_t	ft_strlen(const char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}
+
+char	*ft_strchr(const char *s, int c)
+{
+	char	chr;
+	int		i;
+
+	chr = (char) c;
+	i = -1;
+	while (s[++i])
+	{
+		if (s[i] == chr)
+			return ((char *)&s[i]);
+	}
+	if (s[i] == chr)
+		return ((char *)&s[i]);
+	return (NULL);
+}
+
+char	*ft_strjoin(char const *s1, char const *s2)
+{
+	char	*ptr;
+	int		i;
+	int		j;
+	size_t	s1len;
+	size_t	len;
+
+	if (!s1 && !s2)
+		return (NULL);
+	if (!s1)
+		return (ft_strdup(s2));
+	if (!s2)
+		return (ft_strdup(s1));
+	s1len = ft_strlen(s1);
+	len = s1len + ft_strlen(s2);
+	ptr = malloc(len + 1);
+	if (!ptr)
+		return (NULL);
+	i = -1;
+	while (s1[++i])
+		ptr[i] = s1[i];
+	j = -1;
+	while (s2[++j])
+		ptr[j + i] = s2[j];
+	ptr[i + j] = '\0';
+	return (ptr);
+}
+
+char	*ft_strdup(const char *s)
+{
+	char	*dup;
+	size_t	len;
+	size_t	i;
+
+	i = 0;
+	len = ft_strlen(s);
+	dup = (char *)malloc(len + 1);
+	if (!dup)
+		return (NULL);
+	while (i < len)
+	{
+		dup[i] = s[i];
+		i++;
+	}
+	dup[i] = '\0';
+	return (dup);
+}
+
+char	*ft_substr(const char *s, size_t start, size_t len)
+{
+	char	*sub;
+	size_t	i;
+	size_t	s_len;
+
+	s_len = ft_strlen(s);
+	i = 0;
+	if (!s || start >= s_len)
+		return (ft_strdup(""));
+	if (len > s_len - start)
+		len = s_len - start;
+	sub = (char *)malloc(len + 1);
+	if (!sub)
+		return (NULL);
+	while (i < len && s[start + i])
+	{
+		sub[i] = s[start + i];
+		i++;
+	}
+	sub[i] = '\0';
+	return (sub);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lib_tools.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:14:18 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/11 01:50:34 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
+{
+	size_t	i;
+
+	i = 0;
+	if (n == 0)
+		return (0);
+	while (s1[i] && s2[i] && s1[i] == s2[i] && i < n - 1)
+	{
+		i++;
+	}
+	return ((unsigned char)s1[i] -(unsigned char)s2[i]);
+}
+
+static int	int_len(long c)
+{
+	int	i;
+
+	i = 0;
+	if (c <= 0)
+	{
+		i++;
+		c = -c;
+	}
+	while (c)
+	{
+		c /= 10;
+		i++;
+	}
+	return (i);
+}
+
+char	*ft_itoa(int n)
+{
+	long	c;
+	char	*str;
+	int		len;
+
+	c = n;
+	len = int_len(c);
+	str = (char *)malloc (len + 1);
+	if (!str)
+		return (NULL);
+	str[len--] = '\0';
+	if (c == 0)
+		str[0] = '0';
+	if (c < 0)
+	{
+		str[0] = '-';
+		c = -c ;
+	}
+	while (c)
+	{
+		str[len--] = (c % 10) + '0';
+		c /= 10;
+	}
+	return (str);
+}
+
+size_t	ft_strlcpy(char *dst, const char *src, size_t dstsize)
+{
+	size_t	slen;
+	size_t	i;
+
+	slen = ft_strlen(src);
+	i = 0;
+	if (dstsize == 0)
+		return (slen);
+	while (src[i] && i < dstsize - 1)
+	{
+		dst[i] = src[i];
+		i++;
+	}
+	dst[i] = '\0';
+	return (slen);
+}
+void	ft_putstr(char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i])
+	{
+		write(1, &str[i], 1);
+		i++;
+	}
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   map_moves.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/10 20:36:20 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/10 20:36:32 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse1.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/10 02:15:17 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/10 16:58:36 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+int	validate_map_file(char *path, t_game *game)
+{
+	game->fd = open(path, O_RDONLY);
+	if (game->fd == -1)
+	{
+		perror("\nError in file");
+		return (0);
+	}
+	game->raw_map = NULL;
+	game->line_count = 0;
+	if (!process_map_content(game))
+		return (0);
+	return (1);
+}
+
+int	process_map_content(t_game *game)
+{
+	char	*line;
+	char	*temp;
+
+	while (1337)
+	{
+		line = get_next_line(game->fd);
+		if (!line)
+			break ;
+		temp = game->raw_map;
+		game->raw_map = ft_strjoin(game->raw_map, line);
+		free(temp);
+		if (!game->raw_map || line[0] == '\n')
+			return (free(line), free(game->raw_map), close(game->fd), 0);
+		free(line);
+		game->line_count++;
+	}
+	game->map_grid = ft_split(game->raw_map, '\n');
+	if (!game->map_grid || !verify_map_shape(game)
+		|| !validate_map_elements(game) || !validate_map_path(*game))
+	{
+		cleanup_resources(game);
+		return (0);
+	}
+	return (1);
+}
+
+int	verify_map_shape(t_game *game)
+{
+	int		i;
+	int		last_line;
+	size_t	len;
+
+	i = 0;
+	last_line = game->line_count - 1;
+	while (i <= last_line)
+	{
+		if ((i != last_line)
+			&& ft_strlen(game->map_grid[i]) != ft_strlen(game->map_grid[i + 1]))
+			return (0);
+		if ((i == 0 || i == last_line) && !check_wall_border(game, i))
+			return (0);
+		if (game->map_grid[i][0] != '1' ||
+			game->map_grid[i][ft_strlen(game->map_grid[i]) - 1] != '1')
+			return (0);
+		i++;
+	}
+	len = ft_strlen(game->raw_map);
+	if (game->raw_map[len - 1] == '\n')
+		return (0);
+	return (1);
+}
+
+int	check_wall_border(t_game *game, int line)
+{
+	int	col;
+
+	col = 0;
+	while (game->map_grid[line][col])
+	{
+		if (game->map_grid[line][col] != '1')
+			return (0);
+		col++;
+	}
+	return (1);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse2.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/10 02:15:20 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/10 17:07:47 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+static void	count_map_element(t_game *game, char element_type, int x, int y)
+{
+	if (element_type == 'C')
+		game->props.collectible_count++;
+	else if (element_type == 'E')
+		game->props.exit_count++;
+	else if (element_type == 'P')
+	{
+		game->props.player_count++;
+		game->props.player_pos_x = x;
+		game->props.player_pos_y = y;
+	}
+}
+
+int	validate_map_elements(t_game *game)
+{
+	int		row;
+	int		col;
+	char	*valid_chars;
+
+	row = -1;
+	valid_chars = "01PCE";
+	while (++row < game->line_count)
+	{
+		col = -1;
+		while (game->map_grid[row][++col])
+		{
+			if (!ft_strchr(valid_chars, game->map_grid[row][col]))
+				return (0);
+			if (game->map_grid[row][col] == 'C' ||
+				game->map_grid[row][col] == 'E' ||
+				game->map_grid[row][col] == 'P')
+				count_map_element(game, game->map_grid[row][col], row, col);
+		}
+	}
+	if (game->props.collectible_count < 1
+		|| game->props.exit_count != 1
+		|| game->props.player_count != 1)
+		return (0);
+	return (1);
+}
+
+void	flood_fill_check(size_t x, size_t y, size_t max_lines, char **grid)
+{
+	if (x < 0 || y < 0 || x >= max_lines || y >= ft_strlen(grid[0]))
+		return ;
+	if (grid[x][y] == 'E')
+	{
+		grid[x][y] = 'V';
+		return ;
+	}
+	if (grid[x][y] == '1' || grid[x][y] == 'V')
+		return ;
+	grid[x][y] = 'V';
+	flood_fill_check(x - 1, y, max_lines, grid);
+	flood_fill_check(x + 1, y, max_lines, grid);
+	flood_fill_check(x, y - 1, max_lines, grid);
+	flood_fill_check(x, y + 1, max_lines, grid);
+}
+
+int	verify_remaining_elements(char **grid)
+{
+	int	row;
+	int	col;
+
+	row = 0;
+	while (grid[row])
+	{
+		col = 0;
+		while (grid[row][col])
+		{
+			if (grid[row][col] == 'C' || grid[row][col] == 'E')
+				return (0);
+			col++;
+		}
+		row++;
+	}
+	return (1);
+}
+
+int	validate_map_path(t_game game)
+{
+	char	**map_copy;
+	int		valid_path;
+
+	valid_path = 0;
+	map_copy = ft_split(game.raw_map, '\n');
+	if (!map_copy)
+		return (0);
+	flood_fill_check(game.props.player_pos_x,
+		game.props.player_pos_y, game.line_count, map_copy);
+	valid_path = verify_remaining_elements(map_copy);
+	free_all(map_copy);
+	return (valid_path);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   so_long.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/11 03:42:33 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+static	int	validate_file_extension(char *path)
+{
+	char	*valid_extenstion;
+	int		path_len;
+
+	valid_extenstion = ".ber";
+	path_len = ft_strlen(path);
+	if (path_len < 4)
+		return (0);
+	return (ft_strncmp(path + path_len - 4, valid_extenstion, 4) == 0);
+}
+
+
+static int	process_map(char *path, t_game *game)
+{
+	if (!validate_file_extension(path))
+	{
+		perror("\nfile extension Problem:");
+		return (0);
+	}
+	game->props.collectible_count = 0;
+	game->props.exit_count = 0;
+	game->props.player_count = 0;
+	if (!validate_map_file(path, game))
+	{
+		perror("\nMap validation failed");
+		return (0);
+	}
+	return (1);
+}
+
+void get_dimention_map(t_game *game)
+{
+    int row = 0;
+    int col = 0;
+    while (game->map_grid[row])
+    {
+        col = ft_strlen(game->map_grid[row]);
+        row++;
+    }
+    game->window_width = col * tile_size;
+    game->window_height = row * tile_size;
+    game->img_width = game->window_width;
+    game->img_height = game->window_height;
+}
+
+
+int	handling_the_keys(t_game *game, unsigned int key_pressed);
+
+void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
+{
+	game->textures[order] = mlx_xpm_file_to_image(game->mlx,name_of_xpm, &game->props.width ,&game->props.height);
+	if (!game->textures[order])
+	{
+		perror("Error In Texture: ");
+		free_all(game->map_grid);
+		free(game->mlx);
+		free(game->win);
+		exit(1);
+	}
+}
+
+void	imgs_to_map(t_game *game)
+{
+	put_xpm_element(game, "./textures/route.xpm", 0);
+	put_xpm_element(game, "./textures/wall.xpm", 1);
+	put_xpm_element(game, "./textures/exit.xpm", 2);
+	put_xpm_element(game, "./textures/nud.xpm", 3);
+	put_xpm_element(game, "./textures/player.xpm", 4);
+}
+void	player_moves(t_game *game,unsigned int key_pressed);
+void create_map(t_game *game)
+{
+    int row = 0;
+    
+    while (game->map_grid[row])
+    {
+        int col = 0;
+        while (game->map_grid[row][col])
+        {
+            int x = col * tile_size;
+            int y = row * tile_size;
+            mlx_put_image_to_window(game->mlx, game->win, game->textures[0], x, y);
+            if (game->map_grid[row][col] == '1')
+                mlx_put_image_to_window(game->mlx, game->win, game->textures[1], x, y);
+            else if (game->map_grid[row][col] == 'E')
+                mlx_put_image_to_window(game->mlx, game->win, game->textures[2], x, y);
+            else if (game->map_grid[row][col] == 'C')
+                mlx_put_image_to_window(game->mlx, game->win, game->textures[3], x, y);
+            else if (game->map_grid[row][col] == 'P')
+                mlx_put_image_to_window(game->mlx, game->win, game->textures[4], x, y);
+                
+            col++;
+        }
+        row++;
+    }
+}
+
+
+int window_exit(t_game *game)
+{
+    int i;
+    for (i = 0; i < 5; i++)
+    {
+        if (game->textures[i])
+            mlx_destroy_image(game->mlx, game->textures[i]);
+    }
+    if (game->win)
+        mlx_destroy_window(game->mlx, game->win);
+    free_all(game->map_grid);
+    if (game->raw_map)
+        free(game->raw_map);
+    
+    exit(0);
+    return 0;
+}
+
+
+void	player_lookup(t_game *game)
+{
+	int row;
+	int col;
+	
+	row = 0;
+	while (game->map_grid[row])
+	{
+		col = 0;
+		while (game->map_grid[row][col])
+		{
+			if (game->map_grid[row][col] == 'P')
+			{
+				game->props.player_pos_x = row;
+				game->props.player_pos_y = col;	
+				return ;
+			}
+			col++;
+		}
+		row++;
+	}
+}
+void	print_moves(t_game *game)
+{
+	char *nmr_moves;
+	nmr_moves = ft_itoa(game->move_count);
+	ft_putstr(">Player moves: ");
+	ft_putstr(nmr_moves);
+	ft_putstr("\n");
+}
+
+int build_graphic_map(t_game *game)
+{
+    game->mlx = mlx_init();
+    if (!game->mlx)
+        return 0;
+        
+    get_dimention_map(game);
+    if (game->window_width > 2304 || game->window_height > 1296)
+    {
+        perror("\nError: Map dimensions too large");
+        free(game->mlx);
+        return 0;
+    }
+    
+    game->win = mlx_new_window(game->mlx, game->window_width, game->window_height, "So_Long");
+    if (!game->win)
+    {    
+        free(game->mlx);
+        return 0;
+    }
+    
+    imgs_to_map(game);
+    create_map(game);
+    mlx_hook(game->win, ON_KEYDOWN, KeyPressMask, handling_the_keys, game);
+    mlx_hook(game->win, ON_DESTROY, 0, window_exit, game);
+    
+    mlx_loop(game->mlx);
+    return 1;
+}
+
+int	handling_the_keys(t_game *game, unsigned int key_pressed)
+{
+	if (key_pressed == ESC_KEY)
+	{
+		window_exit(game);
+	}
+	else if (key_pressed == W_KEY|| key_pressed == A_KEY || key_pressed == S_KEY || key_pressed == D_KEY )
+	{
+		player_moves(game, key_pressed);
+	}
+	return (1);
+}
+void player_new_position(t_game *game, int new_x_position, int new_y_position)
+{
+    if (new_x_position < 0 || new_y_position < 0 || 
+        new_x_position >= game->line_count || 
+        new_y_position >= (int)ft_strlen(game->map_grid[0]))
+        return;
+    
+    char target = game->map_grid[new_x_position][new_y_position];
+    if (target == '1')
+        return;
+    if (target == 'E') {
+        if (game->props.collectible_count == 0) {
+            game->move_count++;
+            print_moves(game);
+            ft_putstr("\nCongrats: You Win!");
+            window_exit(game);
+        }
+        return;
+    }
+    if (target == 'C')
+        game->props.collectible_count--;
+    game->map_grid[new_x_position][new_y_position] = 'P';
+    game->map_grid[game->props.player_pos_x][game->props.player_pos_y] = '0';
+    game->move_count++;
+    
+    game->props.player_pos_x = new_x_position;
+    game->props.player_pos_y = new_y_position;
+    
+    mlx_clear_window(game->mlx, game->win);
+    create_map(game);
+    print_moves(game);
+}
+
+void player_moves(t_game *game, unsigned int key_pressed)
+{
+    player_lookup(game);
+    
+    if (key_pressed == D_KEY)
+        player_new_position(game, game->props.player_pos_x, game->props.player_pos_y + 1);
+    else if (key_pressed == A_KEY)
+        player_new_position(game, game->props.player_pos_x, game->props.player_pos_y - 1);
+    else if (key_pressed == W_KEY)
+        player_new_position(game, game->props.player_pos_x - 1, game->props.player_pos_y);
+    else if (key_pressed == S_KEY)
+        player_new_position(game, game->props.player_pos_x + 1, game->props.player_pos_y);
+}
+
+int main(int ac, char **av)
+{
+    t_game game;
+    ft_memset(&game, 0, sizeof(t_game));
+
+    if (ac != 2)
+    {
+        ft_putstr("\nError: Invalid arguments. Usage: ./so_long map.ber\n");
+        return (1);
+    }
+    
+    if (!process_map(av[1], &game))
+    {    
+        ft_putstr("\nError: Map validation failed\n");
+        return (1);
+    }
+    
+    ft_putstr("\nMap validation successful. Starting game...\n");
+    
+    if (!build_graphic_map(&game)) 
+    {
+        ft_putstr("\nError: Failed to initialize graphics\n");
+        cleanup_resources(&game);
+        return (1);
+    }
+    
+    return (0);
+}
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   split.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/09 15:14:23 by ymazini           #+#    #+#             */
+/*   Updated: 2025/03/10 01:49:48 by ymazini          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../so_long.h"
+
+static int	count_words(const char *s, char c)
+{
+	int	count;
+	int	i;
+
+	i = 0;
+	count = 0;
+	while (s[i])
+	{
+		if (s[i] != c)
+		{
+			count++;
+			while (s[i] && s[i] != c)
+				i++;
+		}
+		else
+			i++;
+	}
+	return (count);
+}
+
+static char	*get_next_word(const char *s, char c, size_t *start)
+{
+	size_t	i;
+	char	*word;
+
+	while (s[*start] == c)
+		(*start)++;
+	i = *start;
+	while (s[i] && s[i] != c)
+		i++;
+	word = malloc((i - *start + 1) * sizeof(char));
+	if (!word)
+		return (NULL);
+	ft_strlcpy(word, s + *start, i - *start + 1);
+	*start = i;
+	return (word);
+}
+
+static char	**free_split(char **array, int size)
+{
+	while (size--)
+		free(array[size]);
+	free(array);
+	return (NULL);
+}
+
+char	**ft_split(const char *s, char c)
+{
+	char	**result;
+	int		words;
+	size_t	i;
+	size_t	pos;
+
+	if (!s)
+		return (NULL);
+	words = count_words(s, c);
+	result = malloc((words + 1) * sizeof(char *));
+	if (!result)
+		return (NULL);
+	i = 0;
+	pos = 0;
+	while (i < (size_t)words)
+	{
+		result[i] = get_next_word(s, c, &pos);
+		if (!result[i])
+			return (free_split(result, i));
+		i++;
+	}
+	result[i] = NULL;
+	return (result);
+}
