@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:17:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 21:26:36 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 22:20:12 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,29 @@ void	print_moves(t_game *game)
 	ft_putstr(nmr_moves);
 	ft_putstr("\n");
 	free(nmr_moves);
+}
+
+int	window_exit(t_game *game)
+{
+	int	i;
+
+	i = 0;
+	if (game->fd > 0)
+	{
+		close(game->fd);
+		game->fd = -1;
+	}
+	while (i < 5)
+	{
+		if (game->textures[i])
+			mlx_destroy_image(game->mlx, game->textures[i]);
+		i++;
+	}
+	if (game->win)
+		mlx_destroy_window(game->mlx, game->win);
+	free_all(game->map_grid);
+	if (game->raw_map)
+		free(game->raw_map);
+	exit (0);
+	return (0);
 }

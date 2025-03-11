@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 21:24:49 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 22:26:11 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,32 @@ static int	process_map(char *path, t_game *game)
 		perror("\nMap validation failed");
 		return (0);
 	}
+	return (1);
+}
+int	build_graphic_map(t_game *game)
+{
+	game->mlx = mlx_init();
+	if (!game->mlx)
+		return (0);
+	get_dimention_map(game);
+	if (game->window_width > 5120 || game->window_height > 2880)
+	{
+		perror("\nError: Map dimensions too large");
+		free(game->mlx);
+		return (0);
+	}
+	game->win = mlx_new_window(game->mlx, game->window_width,
+			game->window_height, "So_Long");
+	if (!game->win)
+	{
+		free(game->mlx);
+		return (0);
+	}
+	imgs_to_map(game);
+	create_map(game);
+	mlx_hook(game->win, 2, 0, handling_the_keys, game);
+	mlx_hook(game->win, ON_DESTROY, 0, window_exit, game);
+	mlx_loop(game->mlx);
 	return (1);
 }
 

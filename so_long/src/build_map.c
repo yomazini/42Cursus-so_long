@@ -6,38 +6,11 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 20:36:25 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 21:44:10 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 22:26:02 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../so_long.h"
-
-int	build_graphic_map(t_game *game)
-{
-	game->mlx = mlx_init();
-	if (!game->mlx)
-		return (0);
-	get_dimention_map(game);
-	if (game->window_width > 5120 || game->window_height > 2880)
-	{
-		perror("\nError: Map dimensions too large");
-		free(game->mlx);
-		return (0);
-	}
-	game->win = mlx_new_window(game->mlx, game->window_width,
-			game->window_height, "So_Long");
-	if (!game->win)
-	{
-		free(game->mlx);
-		return (0);
-	}
-	imgs_to_map(game);
-	create_map(game);
-	mlx_hook(game->win, 2, 0, handling_the_keys, game);
-	mlx_hook(game->win, ON_DESTROY, 0, window_exit, game);
-	mlx_loop(game->mlx);
-	return (1);
-}
 
 void	get_dimention_map(t_game *game)
 {
@@ -80,12 +53,33 @@ void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
 	}
 }
 
+static	void	put_tile(t_game *game, int x, int y, char tile_type)
+{
+	int	img_x;
+	int	img_y;
+
+	img_x = y * TILE_SIZE;
+	img_y = x * TILE_SIZE;
+	mlx_put_image_to_window(game->mlx, game->win,
+		game->textures[0], img_x, img_y);
+	if (tile_type == '1')
+		mlx_put_image_to_window(game->mlx, game->win,
+			game->textures[1], img_x, img_y);
+	else if (tile_type == 'E')
+		mlx_put_image_to_window(game->mlx, game->win,
+			game->textures[2], img_x, img_y);
+	else if (tile_type == 'C')
+		mlx_put_image_to_window(game->mlx, game->win,
+			game->textures[3], img_x, img_y);
+	else if (tile_type == 'P')
+		mlx_put_image_to_window(game->mlx, game->win,
+			game->textures[4], img_x, img_y);
+}
+
 void	create_map(t_game *game)
 {
 	int	row;
 	int	col;
-	int	x;
-	int	y;
 
 	row = 0;
 	while (game->map_grid[row])
@@ -93,22 +87,7 @@ void	create_map(t_game *game)
 		col = 0;
 		while (game->map_grid[row][col])
 		{
-			x = col * TILE_SIZE;
-			y = row * TILE_SIZE;
-			mlx_put_image_to_window(game->mlx, game->win,
-				game->textures[0], x, y);
-			if (game->map_grid[row][col] == '1')
-				mlx_put_image_to_window(game->mlx, game->win,
-					game->textures[1], x, y);
-			else if (game->map_grid[row][col] == 'E')
-				mlx_put_image_to_window(game->mlx, game->win,
-					game->textures[2], x, y);
-			else if (game->map_grid[row][col] == 'C')
-				mlx_put_image_to_window(game->mlx, game->win,
-					game->textures[3], x, y);
-			else if (game->map_grid[row][col] == 'P')
-				mlx_put_image_to_window(game->mlx, game->win,
-					game->textures[4], x, y);
+			put_tile(game, row, col, game->map_grid[row][col]);
 			col++;
 		}
 		row++;

@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 20:36:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 22:06:30 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 22:20:05 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,31 +20,6 @@ int	handling_the_keys(int key_pressed, t_game *game)
 		|| key_pressed == S_KEY || key_pressed == D_KEY)
 		player_moves(game, key_pressed);
 	return (1);
-}
-
-int	window_exit(t_game *game)
-{
-	int	i;
-
-	i = 0;
-	if (game->fd > 0)
-	{
-		close(game->fd);
-		game->fd = -1;
-	}
-	while (i < 5)
-	{
-		if (game->textures[i])
-			mlx_destroy_image(game->mlx, game->textures[i]);
-		i++;
-	}
-	if (game->win)
-		mlx_destroy_window(game->mlx, game->win);
-	free_all(game->map_grid);
-	if (game->raw_map)
-		free(game->raw_map);
-	exit (0);
-	return (0);
 }
 
 void	player_moves(t_game *game, unsigned int key_pressed)
@@ -87,6 +62,20 @@ void	player_lookup(t_game *game)
 	}
 }
 
+static	void	update_player_position(t_game *game, int new_x, int new_y)
+{
+	if (game->map_grid[new_x][new_y] == 'C')
+		game->props.collectible_count--;
+	game->map_grid[new_x][new_y] = 'P';
+	game->map_grid[game->props.player_pos_x][game->props.player_pos_y] = '0';
+	game->move_count++;
+	game->props.player_pos_x = new_x;
+	game->props.player_pos_y = new_y;
+	mlx_clear_window(game->mlx, game->win);
+	create_map(game);
+	print_moves(game);
+}
+
 void	player_new_position(t_game *game, int new_x_position,
 			int new_y_position)
 {
@@ -110,13 +99,5 @@ void	player_new_position(t_game *game, int new_x_position,
 		}
 		return ;
 	}
-	if (target == 'C')
-		game->props.collectible_count--;
-	game->map_grid[new_x_position][new_y_position] = 'P';
-	game->map_grid[game->props.player_pos_x][game->props.player_pos_y] = '0';
-	game->move_count++;
-	game->props.player_pos_x = new_x_position;
-	game->props.player_pos_y = new_y_position;
-	(mlx_clear_window(game->mlx, game->win),
-		create_map(game), print_moves(game));
+	update_player_position(game, new_x_position, new_y_position);
 }
