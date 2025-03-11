@@ -5,7 +5,7 @@ CFLAGS = -Wall -Wextra -Werror
 NAME = so_long
 NAME_BONUS = so_long_bonus
 
-SRC = src/so_long.c src/gnl.c src/parse1.c src/parse2.c src/cleaning.c src/gnl_utils.c src/lib_tools.c src/split.c
+SRC = src/so_long.c src/gnl.c src/parse1.c src/parse2.c src/cleaning.c src/gnl_utils.c src/lib_tools.c src/split.c src/build_map.c src/events_n_moves.c
 
 OBJ = $(SRC:.c=.o)
 

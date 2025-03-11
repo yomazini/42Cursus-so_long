@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 20:28:42 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 21:14:07 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ static int	process_map(char *path, t_game *game)
 	return (1);
 }
 
-void get_dimention_map(t_game *game)
+void get_dimention_map(t_game *game)// 2.build_map.c 
 {
     int row = 0;
     int col = 0;
@@ -51,15 +51,13 @@ void get_dimention_map(t_game *game)
         col = ft_strlen(game->map_grid[row]);
         row++;
     }
-    game->window_width = col * tile_size;
-    game->window_height = row * tile_size;
+    game->window_width = col * TILE_SIZE;
+    game->window_height = row * TILE_SIZE;
     game->img_width = game->window_width;
     game->img_height = game->window_height;
 }
 
-int handling_the_keys(int key_pressed, t_game *game);
-
-void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
+void	put_xpm_element(t_game *game, char *name_of_xpm, int order)//4.build_map.c
 {
 	game->textures[order] = mlx_xpm_file_to_image(game->mlx,name_of_xpm, &game->props.width ,&game->props.height);
 	if (!game->textures[order])
@@ -72,7 +70,7 @@ void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
 	}
 }
 
-void	imgs_to_map(t_game *game)
+void	imgs_to_map(t_game *game)//3. build_map.c
 {
 	put_xpm_element(game, "./textures/route.xpm", 0);
 	put_xpm_element(game, "./textures/wall.xpm", 1);
@@ -80,8 +78,8 @@ void	imgs_to_map(t_game *game)
 	put_xpm_element(game, "./textures/nud.xpm", 3);
 	put_xpm_element(game, "./textures/player.xpm", 4);
 }
-void	player_moves(t_game *game,unsigned int key_pressed);
-void create_map(t_game *game)
+
+void create_map(t_game *game)// 5.build_map.c
 {
     int row = 0;
     
@@ -90,8 +88,8 @@ void create_map(t_game *game)
         int col = 0;
         while (game->map_grid[row][col])
         {
-            int x = col * tile_size;
-            int y = row * tile_size;
+            int x = col * TILE_SIZE;
+            int y = row * TILE_SIZE;
             mlx_put_image_to_window(game->mlx, game->win, game->textures[0], x, y);
             if (game->map_grid[row][col] == '1')
                 mlx_put_image_to_window(game->mlx, game->win, game->textures[1], x, y);
@@ -101,14 +99,13 @@ void create_map(t_game *game)
                 mlx_put_image_to_window(game->mlx, game->win, game->textures[3], x, y);
             else if (game->map_grid[row][col] == 'P')
                 mlx_put_image_to_window(game->mlx, game->win, game->textures[4], x, y);
-                
             col++;
         }
         row++;
     }
 }
 
-int window_exit(t_game *game)
+int window_exit(t_game *game) // 2.events_n_moves.c
 {
     int i;
    if (game->fd > 0)
@@ -126,13 +123,12 @@ int window_exit(t_game *game)
         mlx_destroy_window(game->mlx, game->win);
     free_all(game->map_grid);
     if (game->raw_map)
-        free(game->raw_map);
-    
+        free(game->raw_map); 
     exit(0);
     return 0;
 }
 
-void	player_lookup(t_game *game)
+void	player_lookup(t_game *game)// 4. events_n_moves.c
 {
 	int row;
 	int col;
@@ -155,7 +151,7 @@ void	player_lookup(t_game *game)
 	}
 }
 
-void	print_moves(t_game *game)
+void	print_moves(t_game *game)// cleaning.c
 {
 	char *nmr_moves;
 	nmr_moves = ft_itoa(game->move_count);
@@ -165,7 +161,7 @@ void	print_moves(t_game *game)
 	free(nmr_moves);
 }
 
-int build_graphic_map(t_game *game)
+int build_graphic_map(t_game *game) // 1. build_map
 {
     game->mlx = mlx_init();
     if (!game->mlx)
@@ -185,16 +181,15 @@ int build_graphic_map(t_game *game)
         free(game->mlx);
         return 0;
     }
-    
     imgs_to_map(game);
     create_map(game);
-    mlx_hook(game->win, ON_KEYDOWN, KeyPressMask, handling_the_keys, game);
+    mlx_hook(game->win, 2, 1L<<0 , handling_the_keys, game);
     mlx_hook(game->win, ON_DESTROY, 0, window_exit, game);
     mlx_loop(game->mlx);
     return 1;
 }
 
-int handling_the_keys(int key_pressed, t_game *game)
+int handling_the_keys(int key_pressed, t_game *game)//1.events_n_moves.c
 {
     if (key_pressed == ESC_KEY)
         window_exit(game);
@@ -204,7 +199,7 @@ int handling_the_keys(int key_pressed, t_game *game)
     return (1);
 }
 
-void player_new_position(t_game *game, int new_x_position, int new_y_position)
+void player_new_position(t_game *game, int new_x_position, int new_y_position)// 5. events_n_moves.c
 {
     if (new_x_position < 0 || new_y_position < 0 || 
         new_x_position >= game->line_count || 
@@ -237,7 +232,7 @@ void player_new_position(t_game *game, int new_x_position, int new_y_position)
     print_moves(game);
 }
 
-void player_moves(t_game *game, unsigned int key_pressed)
+void player_moves(t_game *game, unsigned int key_pressed)//3.int window_exit(t_game *game).c
 {
     player_lookup(game);
     
@@ -250,9 +245,40 @@ void player_moves(t_game *game, unsigned int key_pressed)
     else if (key_pressed == S_KEY)
         player_new_position(game, game->props.player_pos_x + 1, game->props.player_pos_y);
 }
+void debug_checks(void);
 
-#include "../so_long.h"
+int main(int ac, char **av)
+{
+    t_game game;
+	
+    ft_memset(&game, 0, sizeof(t_game));
+    atexit(debug_checks);
+    if (ac != 2)
+    {
+        ft_putstr("\nError: Invalid arguments. Usage: ./so_long map.ber\n");
+        return (1);
+    }
+    if (!process_map(av[1], &game))
+    {
+        ft_putstr("\nError: Map validation failed\n");
+        return (1);
+    }
+    ft_putstr("\nMap validation successful. Starting game...\n");
+    if (!build_graphic_map(&game))
+    {
+        ft_putstr("\nError: Failed to initialize graphics\n");
+        cleanup_resources(&game);
+        return (1);
+    }
+    /* 
+       Game loop and interactions would go here.
+       For debugging, we cleanup immediately to check that all resources are freed.
+    */
+    cleanup_resources(&game);
+    return (0);
+}
 
+/* --------  */
 void debug_checks(void)
 {
     char cmd[256];
@@ -264,45 +290,44 @@ void debug_checks(void)
     ft_putstr("--- End of Debug Checks ---\n");
 }
 
-
-int main(int ac, char **av)
-{
-    t_game game;
+// int main(int ac, char **av)
+// {
+//     t_game game;
 	
-    ft_memset(&game, 0, sizeof(t_game));
-    atexit(debug_checks);
-  // Register debug_checks() to run when main exits
+//     ft_memset(&game, 0, sizeof(t_game));
+//     atexit(debug_checks);
+//   // Register debug_checks() to run when main exits
 
-    if (ac != 2)
-    {
-        ft_putstr("\nError: Invalid arguments. Usage: ./so_long map.ber\n");
-        return (1);
-    }
+//     if (ac != 2)
+//     {
+//         ft_putstr("\nError: Invalid arguments. Usage: ./so_long map.ber\n");
+//         return (1);
+//     }
 
-    if (!process_map(av[1], &game))
-    {
-        ft_putstr("\nError: Map validation failed\n");
-        return (1);
-    }
+//     if (!process_map(av[1], &game))
+//     {
+//         ft_putstr("\nError: Map validation failed\n");
+//         return (1);
+//     }
 
-    ft_putstr("\nMap validation successful. Starting game...\n");
+//     ft_putstr("\nMap validation successful. Starting game...\n");
 
-    if (!build_graphic_map(&game))
-    {
-        ft_putstr("\nError: Failed to initialize graphics\n");
-        cleanup_resources(&game);
-        return (1);
-    }
+//     if (!build_graphic_map(&game))
+//     {
+//         ft_putstr("\nError: Failed to initialize graphics\n");
+//         cleanup_resources(&game);
+//         return (1);
+//     }
 
-    /* 
-       Game loop and interactions would go here.
-       For debugging, we cleanup immediately to check that all resources are freed.
-    */
-    cleanup_resources(&game);
-    ft_putstr("\nExiting game. Resources cleaned up.\n\n\n");
-	close(game.fd);
-    return (0);
-}
+//     /* 
+//        Game loop and interactions would go here.
+//        For debugging, we cleanup immediately to check that all resources are freed.
+//     */
+//     cleanup_resources(&game);
+//     ft_putstr("\nExiting game. Resources cleaned up.\n\n\n");
+// 	close(game.fd);
+//     return (0);
+// }
 
 
 // int main(int ac, char **av)

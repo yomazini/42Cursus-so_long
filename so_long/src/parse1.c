@@ -6,32 +6,19 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:15:17 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 20:16:48 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 20:53:53 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../so_long.h"
 
-// int	validate_map_file(char *path, t_game *game)
-// {
-// 	game->fd = open(path, O_RDONLY);
-// 	if (game->fd == -1)
-// 	{
-// 		perror("\nError in file");
-// 		return (0);
-// 	}
-// 	game->raw_map = NULL;
-// 	game->line_count = 0;
-// 	if (!process_map_content(game))
-// 		return (0);
-// 	return (1);
-// }
-
 int	validate_map_file(char *path, t_game *game)
 {
-	int fd = open(path, O_RDONLY);
+	int	fd;
+
+	fd = open(path, O_RDONLY);
 	if (fd < 0)
-		return 0;
+		return (0);
 	game->fd = fd;
 	if (game->fd == -1)
 	{
@@ -46,7 +33,6 @@ int	validate_map_file(char *path, t_game *game)
 	game->fd = -1;
 	return (1);
 }
-
 
 int	process_map_content(t_game *game)
 {

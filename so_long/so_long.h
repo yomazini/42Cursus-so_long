@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:13:40 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 03:33:43 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 21:14:16 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,8 @@
 # define S_KEY 1
 # define A_KEY 0
 # define D_KEY 2
-# define ON_KEYDOWN 2
 # define ON_DESTROY 17
-# define KeyPressMask 1L<<0
-# define tile_size 50
+# define TILE_SIZE 50
 
 typedef struct s_map_data
 {
@@ -57,11 +55,6 @@ typedef struct s_game
 	size_t			move_count;
 }					t_game;
 
-
-
-void *ft_memset(void *b, int c, size_t len);
-
-
 /* gnl functions */
 char	*get_next_line(int fd);
 size_t	ft_strlen(const char *s);
@@ -80,6 +73,8 @@ void	ft_putstr(char *str);
 /* cleaning functions */
 void	cleanup_resources(t_game *game);
 void	free_all(char **grid);
+void	*ft_memset(void *b, int c, size_t len);
+void	print_moves(t_game *game);
 
 /* parsing functions */
 int		validate_map_file(char *path, t_game *game);
@@ -93,8 +88,20 @@ int		validate_map_path(t_game game);
 
 /* this below for the mlx map building */
 
+/*	build_map.c 	*/
 
+int build_graphic_map(t_game *game);
+void get_dimention_map(t_game *game);
+void	imgs_to_map(t_game *game);
+void create_map(t_game *game);
+void	put_xpm_element(t_game *game, char *name_of_xpm, int order);
 
+/*	events_n_moves.c	*/
 
+int handling_the_keys(int key_pressed, t_game *game);
+int window_exit(t_game *game);
+void player_moves(t_game *game, unsigned int key_pressed);
+void	player_lookup(t_game *game);
+void player_new_position(t_game *game, int new_x_position, int new_y_position);
 
 #endif 
