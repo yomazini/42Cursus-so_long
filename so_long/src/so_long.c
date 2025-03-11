@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 20:18:40 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 20:28:42 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,29 +252,6 @@ void player_moves(t_game *game, unsigned int key_pressed)
 }
 
 #include "../so_long.h"
-
-// void debug_checks()
-// {
-//     char cmd[256];
-//     pid_t pid = getpid();
-//     sprintf(cmd, "lsof -p %d", pid);
-//     ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
-//     system("leaks so_long");  // Memory leak check (macOS)
-//     system(cmd);              // FD check using proper PID
-//     ft_putstr("--- End of Debug Checks ---\n");
-// }
-
-// void debug_checks(void)  // Remove t_game parameter if not used in this function
-// {
-//     char cmd[256];
-//     pid_t pid = getpid();
-//     sprintf(cmd, "lsof -p %d", pid);
-//     ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
-//     system("leaks so_long");
-//     system(cmd);
-//     ft_putstr("--- End of Debug Checks ---\n");
-// }
-
 
 void debug_checks(void)
 {
