@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 02:17:20 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 18:00:11 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 18:20:19 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,12 @@ void	cleanup_resources(t_game *game)
         free_all(game->map_grid);
         game->map_grid = NULL;
     }
-	close(game->fd);
+	// close(game->fd);
+	if (game->fd > 0) {
+        close(game->fd);
+        game->fd = 0; // Mark as closed
+    }
+	
 }
 
 void	free_all(char **grid)

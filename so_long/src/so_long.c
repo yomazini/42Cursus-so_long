@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/11 18:02:15 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/11 20:18:40 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,12 @@ void create_map(t_game *game)
 int window_exit(t_game *game)
 {
     int i;
+   if (game->fd > 0)
+    {
+        close(game->fd);
+        game->fd = -1;
+    }
+
     for (i = 0; i < 5; i++)
     {
         if (game->textures[i])
@@ -247,14 +253,37 @@ void player_moves(t_game *game, unsigned int key_pressed)
 
 #include "../so_long.h"
 
-void debug_checks()
+// void debug_checks()
+// {
+//     char cmd[256];
+//     pid_t pid = getpid();
+//     sprintf(cmd, "lsof -p %d", pid);
+//     ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
+//     system("leaks so_long");  // Memory leak check (macOS)
+//     system(cmd);              // FD check using proper PID
+//     ft_putstr("--- End of Debug Checks ---\n");
+// }
+
+// void debug_checks(void)  // Remove t_game parameter if not used in this function
+// {
+//     char cmd[256];
+//     pid_t pid = getpid();
+//     sprintf(cmd, "lsof -p %d", pid);
+//     ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
+//     system("leaks so_long");
+//     system(cmd);
+//     ft_putstr("--- End of Debug Checks ---\n");
+// }
+
+
+void debug_checks(void)
 {
     char cmd[256];
     pid_t pid = getpid();
     sprintf(cmd, "lsof -p %d", pid);
     ft_putstr("\n--- Debugging: Checking for leaks and open file descriptors ---\n");
-    system("leaks so_long");  // Memory leak check (macOS)
-    system(cmd);              // FD check using proper PID
+    system("leaks so_long");
+    system(cmd);
     ft_putstr("--- End of Debug Checks ---\n");
 }
 
@@ -262,9 +291,10 @@ void debug_checks()
 int main(int ac, char **av)
 {
     t_game game;
-
+	
     ft_memset(&game, 0, sizeof(t_game));
-    atexit(debug_checks);  // Register debug_checks() to run when main exits
+    atexit(debug_checks);
+  // Register debug_checks() to run when main exits
 
     if (ac != 2)
     {
