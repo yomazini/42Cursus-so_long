@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/12 22:01:33 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/12 22:11:13 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,12 +48,12 @@ int	build_graphic_map(t_game *game)
 	if (game->window_width > 1900 || game->window_height > 1100)
 	{
 		perror("\nError: Map dimensions too large");
-		cleanup_resources(game);//first
+		cleanup_resources(game);
 		exit (1);
 	}
 	game->mlx = mlx_init();
 	if (!game->mlx)
-		return (0);
+		return (free(game->mlx), 0);
 	game->win = mlx_new_window(game->mlx, game->window_width,
 			game->window_height, "So_Long");
 	if (!game->win)

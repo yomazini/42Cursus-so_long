@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 20:36:25 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/12 21:07:11 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/12 22:15:49 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,11 @@ void	get_dimention_map(t_game *game)
 
 void	imgs_to_map(t_game *game)
 {
-	put_xpm_element(game, "./textures/route.xpm", 0);
-	put_xpm_element(game, "./textures/wall.xpm", 1);
-	put_xpm_element(game, "./textures/exit.xpm", 2);
-	put_xpm_element(game, "./textures/nud.xpm", 3);
-	put_xpm_element(game, "./textures/player.xpm", 4);
+	put_xpm_element(game, "./textures/Flor1.xpm", 0);
+	put_xpm_element(game, "./textures/walll1.xpm", 1);
+	put_xpm_element(game, "./textures/Exiiit1.xpm", 2);
+	put_xpm_element(game, "./textures/rameen.xpm", 3);
+	put_xpm_element(game, "./textures/Naruto1.xpm", 4);
 }
 
 void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
