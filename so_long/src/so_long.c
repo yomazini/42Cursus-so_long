@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/09 15:14:21 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/12 00:14:55 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/12 21:20:58 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,10 @@ int	build_graphic_map(t_game *game)
 	if (!game->mlx)
 		return (0);
 	get_dimention_map(game);
-	if (game->window_width > 5120 || game->window_height > 2880)
+	if (game->window_width > 2000 || game->window_height > 1200)
 	{
 		perror("\nError: Map dimensions too large");
+		cleanup_resources(game);//first 
 		free(game->mlx);
 		return (0);
 	}
@@ -89,7 +90,6 @@ int	main(int ac, char **av)
 	if (!build_graphic_map(&game))
 	{
 		ft_putstr("\nError: Failed to initialize Graphics\n");
-		cleanup_resources(&game);
 		return (1);
 	}
 	cleanup_resources(&game);
