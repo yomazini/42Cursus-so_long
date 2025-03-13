@@ -20,3 +20,4 @@ So_Long is a minimalist 2D pixel art game developed to meet the requirements of 
 - **Creative Levels:** Unique map layouts that challenge the player.
 - **42 Standards:** Developed following the guidelines and style of the 42 school projects.
 
+[Watch the video on Vimeo](https://player.vimeo.com/video/1065327226))
