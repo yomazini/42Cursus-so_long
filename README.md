@@ -22,6 +22,4 @@ So_Long is a minimalist 2D pixel art game developed to meet the requirements of 
 
 [Watch the video on Vimeo](https://player.vimeo.com/video/1065327226))
 
-[![So_Long Gameplay](https://vimeo.com/1065327226)
-
-![So_Long Gameplay Preview](assets/So_LongMinimalist2DPixelArtGameplay.gif)
+![So_Long Minimalist 2D Pixel Art Gameplay](So_LongMinimalist2DPixelArtGameplay.gif)
