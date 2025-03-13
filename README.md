@@ -125,3 +125,28 @@ flowchart TD
     C --> H[No Exit]
     D --> I[Unreachable Elements]
 ```
+
+```mermaid
+sequenceDiagram
+    participant Program
+    participant MiniLibX
+    participant AppKit
+    participant WindowServer
+    participant OpenGL
+    participant Quartz Compositor
+    
+    Program->>MiniLibX: mlx_init()
+    MiniLibX->>AppKit: NSApplication init
+    MiniLibX->>OpenGL: glXCreateContext()
+    
+    Program->>MiniLibX: mlx_new_window()
+    MiniLibX->>AppKit: NSWindow alloc
+    AppKit->>WindowServer: Register window
+    MiniLibX->>OpenGL: glGenFramebuffers()
+    
+    Program->>MiniLibX: mlx_put_image_to_window()
+    MiniLibX->>OpenGL: glTexImage2D()
+    OpenGL->>Quartz Compositor: Submit framebuffer
+    Quartz Compositor->>WindowServer: Composite final display
+```
+    
