@@ -6,7 +6,7 @@
 /*   By: ymazini <ymazini@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/10 20:36:25 by ymazini           #+#    #+#             */
-/*   Updated: 2025/03/12 22:35:54 by ymazini          ###   ########.fr       */
+/*   Updated: 2025/03/15 18:12:26 by ymazini          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ void	put_xpm_element(t_game *game, char *name_of_xpm, int order)
 	{
 		perror("Error In Texture: ");
 		free_all(game->map_grid);
-		free(game->mlx);
 		free(game->win);
 		exit(1);
 	}
