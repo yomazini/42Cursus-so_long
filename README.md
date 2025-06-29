@@ -482,57 +482,7 @@ flowchart TD
     style O fill:#607D8B,stroke:#455A64
 ```
 
-## 7. Texture and Rendering System
-
-```mermaid
-%%{init: {'theme': 'base'}}%%
-graph TD
-    subgraph "Texture Loading - imgs_to_map()"
-        TL[Texture Loading] --> W[Wall.xpm - textures[0]]
-        TL --> F[Floor.xpm - textures[1]]
-        TL --> P[Player.xpm - textures[2]]
-        TL --> C[Collectible.xpm - textures[3]]
-        TL --> E[Exit.xpm - textures[4]]
-    end
-    
-    subgraph "Map Rendering - create_map()"
-        MR[Map Rendering] --> I1{map[y][x] == '1'}
-        I1 -->|Yes| PW[put_xpm_element Wall]
-        I1 -->|No| I0{map[y][x] == '0'}
-        I0 -->|Yes| PF[put_xpm_element Floor]
-        I0 -->|No| IP{map[y][x] == 'P'}
-        IP -->|Yes| PP[put_xpm_element Player]
-        IP -->|No| IC{map[y][x] == 'C'}
-        IC -->|Yes| PC[put_xmp_element Collectible]
-        IC -->|No| IE{map[y][x] == 'E'}
-        IE -->|Yes| PE[put_xpm_element Exit]
-    end
-    
-    subgraph "Coordinate System"
-        CS[Coordinate Calculation] --> X[x_pos = col * TILE_SIZE]
-        CS --> Y[y_pos = row * TILE_SIZE]
-        X --> R[mlx_put_image_to_window]
-        Y --> R
-    end
-    
-    W --> PW
-    F --> PF
-    P --> PP
-    C --> PC
-    E --> PE
-    
-    PW --> CS
-    PF --> CS
-    PP --> CS
-    PC --> CS
-    PE --> CS
-    
-    style TL fill:#9C27B0,stroke:#7B1FA2
-    style MR fill:#FF9800,stroke:#F57C00
-    style CS fill:#2196F3,stroke:#1976D2
-```
-
-## 8. Error Handling Matrix
+## 7. Error Handling Matrix
 
 ```mermaid
 %%{init: {'theme': 'base'}}%%
