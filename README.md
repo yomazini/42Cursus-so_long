@@ -9,11 +9,11 @@
 ## 📺 Gameplay Demo
 
 ### Video Showcase
-[![Watch the video on Vimeo](gameplay-thumbnail)](https://vimeo.com/1065327226)
+[![Watch the video on Vimeo](img/gameplay-thumbnail)](https://vimeo.com/1065327226)
 [Watch the video on Vimeo](https://player.vimeo.com/video/1065327226)
 
 ### Live Gameplay
-![So_Long Minimalist 2D Pixel Art Gameplay](So_LongMinimalist2DPixelArtGameplay.gif)
+![So_Long Minimalist 2D Pixel Art Gameplay](img/So_LongMinimalist2DPixelArtGameplay.gif)
 
 ---
 
