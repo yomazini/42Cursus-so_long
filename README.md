@@ -692,8 +692,10 @@ make
 
 ---
 
-## 🎊 Conclusion
+## Author;
 
-So_Long demonstrates the integration of low-level graphics programming with game development principles. By understanding the underlying macOS graphics system and MiniLibX abstraction, developers can create efficient, engaging 2D games while learning fundamental concepts of graphics programming, memory management, and event-driven architecture.
+🎓 42 Intra: [ymazini](https://profile.intra.42.fr/users/ymazini)
+🐙 GitHub: [yomazini](https://github.com/yomazini)
+💼 LinkedIn: [Connect with me](https://www.linkedin.com/in/youssef-mazini/)
 
-The project serves as an excellent introduction to game development, providing hands-on experience with graphics APIs, file processing, algorithmic problem-solving (flood fill), and user interaction design within the educational framework of 42 School standards.
+
