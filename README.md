@@ -1,7 +1,6 @@
 # So_Long: Complete 2D Game Development Guide
 ## Minimalist Pixel Art Game with MiniLibX
 
----
 
 ![42 School Badge](https://img.shields.io/badge/42-School-blue)
 ![Norminette](https://img.shields.io/badge/Norminette-passing-success)
