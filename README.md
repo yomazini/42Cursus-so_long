@@ -157,6 +157,340 @@ sequenceDiagram
 
 ------------------
 
+
+The Foundation: macOS Graphics System
+The core of how graphics are displayed on macOS involves several interconnected components
+.
+A. Quartz: The Core Rendering Engine
+•
+Foundation: Quartz is the fundamental graphics framework in macOS
+.
+•
+Handles Pixels: It's the actual system that deals with pixels and basic graphics rendering
+.
+•
+Quartz 2D: The core 2D rendering engine for shapes, text, and images
+. Supports transparency, gradients, and more
+.
+•
+You Don't Interact Directly: Typically, developers don't code directly with Quartz due to its low-level nature
+.
+B. AppKit: Building User Interfaces
+•
+macOS Specific Framework: AppKit is unique to macOS and part of the Cocoa framework
+.
+•
+GUI Development: Used to build graphical user interfaces (GUIs) for macOS applications
+.
+•
+Built on Quartz: AppKit uses Quartz under the hood
+.
+•
+Key Features
+:
+◦
+Windows and Views: Manages application windows (NSWindow) and provides the basic building block for rendering and event handling (NSView)
+.
+◦
+Event Handling: Manages user interactions like mouse clicks and key presses
+.
+◦
+Drawing and Graphics: Supports 2D graphics rendering and image handling (NSGraphicsContext, NSBezierPath, NSImage)
+.
+◦
+Controls and Interface Components: Includes buttons (NSButton), sliders (NSSlider), tables (NSTableView), etc.
+.
+◦
+Document Management: Structure for document-based applications (NSDocument)
+.
+◦
+Menus and Toolbars: Classes for creating and managing menus (NSMenu) and toolbars (NSToolbar)
+.
+◦
+Animation and Effects: Basic animations (NSAnimation)
+.
+◦
+Accessibility: Ensures accessibility compliance
+.
+◦
+Drag and Drop: Built-in support for drag-and-drop operations
+.
+◦
+File Handling: Integrates with the file system
+.
+C. OpenGL: High-Performance Graphics API
+•
+Cross-Platform: OpenGL works on different operating systems
+.
+•
+Hardware Accelerated: It uses the GPU to speed up rendering
+.
+•
+2D and 3D Graphics: Capable of rendering both 2D and 3D graphics
+.
+•
+Sits on Top of Quartz: OpenGL also interacts with Quartz
+.
+•
+Why Use with MiniLibX (Instead of Just AppKit)
+:
+◦
+Performance: AppKit drawing is not optimised for high-performance graphics; OpenGL leverages the GPU for faster real-time rendering
+.
+◦
+Advanced Graphics: AppKit is limited to basic 2D; OpenGL supports 3D, shaders, lighting, shadows, and textures
+.
+D. WindowServer: Managing Windows
+•
+Core macOS Service: The WindowServer is responsible for managing all windows on the screen
+.
+•
+Intermediary: It acts as a go-between for applications and the graphics hardware
+.
+•
+Key Responsibilities
+:
+◦
+Managing how things are displayed.
+◦
+Handling how content is drawn.
+◦
+Coordinating input events.
+•
+Interaction with AppKit: Applications (like those using AppKit or MiniLibX) communicate with the WindowServer to display their windows
+.
+E. Quartz Compositor: Combining Visual Elements
+•
+Part of Quartz: The Quartz Compositor is a crucial part of the Quartz system
+.
+•
+Composition: Responsible for combining visual elements from different sources (windows, UI) into the final image
+.
+•
+Key Functions
+:
+◦
+Layering of windows.
+◦
+Managing visibility.
+◦
+Handling transparency and animations.
+◦
+Reading the framebuffer (memory where the GPU writes rendered images)
+.
+F. GPU (Graphics Processing Unit): Hardware Acceleration
+•
+Specialised Hardware: The GPU is designed specifically for accelerating graphics rendering
+.
+•
+Key Roles
+:
+◦
+Rendering graphics (shapes, textures, 3D objects).
+◦
+Offloading calculations (parallel processing for 3D and shaders).
+◦
+Managing memory (textures, shaders, frame buffers).
+•
+Works with Graphics APIs: The GPU directly interacts with APIs like OpenGL
+.
+G. Screen: The Display
+•
+The physical display where the final rendered image is shown
+.
+II. MiniLibX: A Simplified Graphics Library
+MiniLibX is a small library designed to make creating graphical applications easier, particularly for educational purposes like the 42 School projects
+.
+A. Purpose and Abstraction
+•
+Simplified Use: Provides easy-to-use functions for graphics without dealing with the complexity of the underlying graphics systems
+.
+•
+Abstraction Layer: MiniLibX hides the details of Quartz, AppKit, and OpenGL
+. You use simple MiniLibX functions, and it handles the complex interactions behind the scenes
+.
+B. How MiniLibX Works (on macOS)
+:
+1.
+Starting the Program (mlx_init())
+:
+◦
+Establishes a connection with the macOS Graphics system
+.
+◦
+Initialises internal data structures to manage windows, events, and rendering
+.
+◦
+Allocates memory
+.
+◦
+Sets up an OpenGL context (workspace for the GPU)
+.
+◦
+Prepares communication with AppKit
+.
+◦
+Connection to AppKit: Sends a request to AppKit to establish a connection
+. AppKit prepares resources and ensures OpenGL can work within its windows
+.
+◦
+AppKit communicates with WindowServer: AppKit tells the WindowServer that the program wants to create a window
+. The WindowServer reserves resources and prepares to route events
+.
+◦
+Failure of mlx_init(): Can occur if there's no AppKit connection or OpenGL support, leading to program failure
+.
+2.
+Creating a Window (mlx_new_window())
+:
+◦
+Request to AppKit: MiniLibX forwards a request to AppKit with window size and title
+.
+◦
+Interaction with WindowServer: AppKit communicates with the WindowServer, which allocates resources and makes the window visible
+.
+◦
+Quartz Compositor: The Quartz Compositor manages layering and ensures the new window is displayed correctly
+.
+3.
+Drawing Something (mlx_pixel_put())
+:
+◦
+MiniLibX to OpenGL: MiniLibX translates the drawing command into OpenGL instructions
+.
+◦
+OpenGL to GPU: OpenGL tells the GPU to draw (e.g., a pixel with a specific colour at a coordinate)
+.
+◦
+Framebuffer Storage: The GPU writes the drawn content into the framebuffer
+.
+◦
+Quartz Compositor Reads Framebuffer: The Quartz Compositor retrieves the image from the framebuffer
+.
+◦
+Final Image Display: The Quartz Compositor composites the image and sends it to the screen
+.
+4.
+Displaying Graphics (General)
+:
+◦
+Drawing happens to the framebuffer
+.
+◦
+The Quartz Compositor combines the framebuffer with other elements
+.
+◦
+The GPU finalises the rendering
+.
+◦
+The final image is displayed on the screen
+.
+5.
+Handling User Input (mlx_key_hook(), mlx_loop())
+:
+◦
+mlx_key_hook() sets up a function to be called when a key is pressed
+.
+◦
+mlx_loop() starts listening for events
+.
+◦
+The WindowServer detects events (e.g., key press) and sends them to the program via AppKit
+.
+◦
+MiniLibX then executes your specified callback function
+.
+C. Key MiniLibX Functions:
+•
+Initialisation:
+◦
+void *mlx_init(); - Establishes connection with the graphical server
+. Returns a pointer to the MiniLibX instance
+.
+•
+Window Management:
+◦
+void *mlx_new_window(void *mlx_ptr, int width, int height, char *title); - Creates a new window
+.
+◦
+int mlx_clear_window(void *mlx_ptr, void *win_ptr); - Clears the window content
+.
+◦
+int mlx_destroy_window(void *mlx_ptr, void *win_ptr); - Closes and frees resources for a window
+.
+•
+Drawing:
+◦
+int mlx_pixel_put(void *mlx_ptr, void *win_ptr, int x, int y, int color); - Draws a single pixel at (x, y) with the given colour (0xRRGGBB)
+. Slow for many pixels
+.
+•
+Image Management:
+◦
+void *mlx_xpm_file_to_image(void *mlx_ptr, char *filename, int *width, int *height); - Loads an image from an XPM file
+.
+◦
+int mlx_put_image_to_window(void *mlx_ptr, void *win_ptr, void *img_ptr, int x, int y); - Displays an image on the window
+.
+◦
+void *mlx_new_image(void *mlx_ptr, int width, int height); - Creates a new blank image
+.
+◦
+char *mlx_get_data_addr(void *img_ptr, int *bits_per_pixel, int *size_line, int *endian); - Gets direct access to image pixel data
+.
+◦
+int mlx_destroy_image(void *mlx_ptr, void *img_ptr); - Frees image resources
+.
+•
+Event Handling:
+◦
+int mlx_loop(void *mlx_ptr); - Starts the event listening loop
+.
+◦
+int mlx_hook(void *win_ptr, int x_event, int x_mask, int (*funct_ptr)(), void *param); - Sets a callback for a specific event type (e.g., key press (2), mouse click (4), window close (17))
+.
+◦
+int mlx_loop_hook(void *mlx_ptr, int (*funct_ptr)(), void *param); - Callback run on every loop iteration
+.
+◦
+int mlx_key_hook(void *win_ptr, int (*funct_ptr)(), void *param); - Simplified key press callback
+.
+◦
+int mlx_mouse_hook(void *win_ptr, int (*funct_ptr)(), void *param); - Callback for mouse button presses
+.
+•
+Text:
+◦
+int mlx_string_put(void *mlx_ptr, void *win_ptr, int x, int y, int color, char *string); - Displays a string on the window
+.
+•
+Cleanup: Always destroy windows and images before exiting
+.
+D. Colors:
+•
+Represented as 32-bit integers: 0xRRGGBB or 0xAARRGGBB (with optional alpha for transparency)
+.
+E. Keyboard and Mouse:
+•
+Interaction handled through key codes (system-dependent, e.g., Escape is 53 on macOS) and mouse button numbers (e.g., 1 for left-click)
+.
+III. Contextual Information:
+•
+Display System: Manages what's on the screen, how it's drawn, and coordinates input
+. On macOS, this is managed by the WindowServer
+.
+•
+Graphical Environment (e.g., in "so_long"): Includes the game window, user input handling, and game elements, created using MiniLibX
+.
+•
+Graphics System (Overall): Comprises the Display System, Graphics APIs (Quartz, Metal on macOS), and the GPU
+.
+•
+Framework: A pre-built set of tools and conventions to help structure applications, examples include OpenGL, MiniLibX, and AppKit
+.
+
+
+
 ------------------
 
 I. Core macOS Graphics Components
