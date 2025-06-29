@@ -3,6 +3,10 @@
 
 ---
 
+![42 School Badge](https://img.shields.io/badge/42-School-blue)
+![Norminette](https://img.shields.io/badge/Norminette-passing-success)
+![Score](https://img.shields.io/badge/Score-100%2F100-brightgreen)
+
 ## 📺 Gameplay Demo
 
 ### Video Showcase
