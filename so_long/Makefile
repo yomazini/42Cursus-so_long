@@ -9,25 +9,10 @@ SRC = src/so_long.c src/gnl.c src/parse1.c src/parse2.c src/cleaning.c src/gnl_u
 OBJ = $(SRC:.c=.o)
 
 
-define SOLONG_BANNER
-	@echo "$(BLUE)"
-	@echo "███████╗ ██████╗     ██╗      ██████╗ ███╗   ██╗ ██████╗ "
-	@echo "██╔════╝██╔═══██╗    ██║     ██╔═══██╗████╗  ██║██╔════╝ "
-	@echo "███████╗██║   ██║    ██║     ██║   ██║██╔██╗ ██║██║  ███╗"
-	@echo "╚════██║██║   ██║    ██║     ██║   ██║██║╚██╗██║██║   ██║"
-	@echo "███████║╚██████╔╝    ███████╗╚██████╔╝██║ ╚████║╚██████╔╝"
-	@echo "╚══════╝ ╚═════╝     ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ "
-	@echo "$(RESET)"
-endef
-
-BLUE = \033[1;34m
-RESET = \033[0m
-
 
 all: $(NAME)
 
 $(NAME): $(OBJ) 
-	$(SOLONG_BANNER)
 	$(CC)  $(CFLAGS) $(OBJ) -lmlx -framework OpenGL -framework AppKit -o $(NAME)
 
 src/%.o: src/%.c so_long.h
